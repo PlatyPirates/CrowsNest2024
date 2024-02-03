@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
+}
+
+mainClassName = 'Main'
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '/usr/local/frc/java', '.'
+    }
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation files('apriltag.jar')
+    implementation files('wpimath.jar')
+    implementation files('wpinet.jar')
+    implementation files('wpiutil.jar')
+    implementation files('ntcore.jar')
+    implementation files('cscore.jar')
+    implementation files('cameraserver.jar')
+    implementation files('opencv-460.jar')
+    implementation files('wpilibj.jar')
+    implementation files('wpiHal.jar')
+}
