@@ -333,11 +333,11 @@ public final class Main {
         listOfContours.add(contour3);
         listOfContours.add(contour4);
 
-        int border = 15; // border width in pixels
+        int borderWidth = 15; // border width in pixels
         Scalar myBorderColor = new Scalar(255, 0, 0); // RGB values
         //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
         //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
-        drawContours(mat, listOfContours, -1, myBorderColor, border);
+        org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
       }
       numTargetsDetected = detections.length;
       returnedImg = mat;
