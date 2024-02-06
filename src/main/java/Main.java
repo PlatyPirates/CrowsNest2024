@@ -34,6 +34,7 @@ import org.opencv.imgproc.*;
 import org.opencv.core.Point;
 import org.opencv.core.MatOfPoint;
 import org.opencv.imgproc.Imgproc.*;
+import org.ejml.data.Matrix;
 
 /*
    JSON format:

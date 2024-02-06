@@ -28,4 +28,5 @@ dependencies {
     implementation files('opencv-460.jar')
     implementation files('wpilibj.jar')
     implementation files('wpiHal.jar')
+    implementation files('ejml-core-0.42.jar')
 }
