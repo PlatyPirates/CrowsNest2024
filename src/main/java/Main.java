@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSource;
@@ -95,7 +96,8 @@ public final class Main {
   };
 
   public static int team;
-  public static boolean server;
+  public static boolean serverBoolean;
+  public static CvSource server = CameraServer.putVideo("Rectangle",640,480);
   public static List<CameraConfig> cameraConfigs = new ArrayList<>();
   public static List<SwitchedCameraConfig> switchedCameraConfigs = new ArrayList<>();
   public static List<VideoSource> cameras = new ArrayList<>();
@@ -201,9 +203,9 @@ public final class Main {
     if (obj.has("ntmode")) {
       String str = obj.get("ntmode").getAsString();
       if ("client".equalsIgnoreCase(str)) {
-        server = false;
+        serverBoolean = false;
       } else if ("server".equalsIgnoreCase(str)) {
-        server = true;
+        serverBoolean = true;
       } else {
         parseError("could not understand ntmode value '" + str + "'");
       }
@@ -240,7 +242,6 @@ public final class Main {
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.path);
     UsbCamera camera = new UsbCamera(config.name, config.path);
-    MjpegServer server = CameraServer.startAutomaticCapture(camera);
 
     Gson gson = new GsonBuilder().create();
 
@@ -296,7 +297,7 @@ public final class Main {
    * Example pipeline.
    */
   public static class MyPipeline implements VisionPipeline {
-    public Mat returnedImg;
+    public Mat returnedImg = new Mat();
     public int numTargetsDetected;
 
     @Override
@@ -359,7 +360,7 @@ public final class Main {
 
     // start NetworkTables
     NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
-    if (server) {
+    if (serverBoolean) {
       System.out.println("Setting up NetworkTables server");
       ntinst.startServer();
     } else {
