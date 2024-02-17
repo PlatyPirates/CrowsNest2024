@@ -98,7 +98,6 @@ public final class Main {
 
   public static int team;
   public static boolean serverBoolean;
-  public static CvSource server = CameraServer.putVideo("Rectangle",640,480);
   public static List<CameraConfig> cameraConfigs = new ArrayList<>();
   public static List<SwitchedCameraConfig> switchedCameraConfigs = new ArrayList<>();
   public static List<VideoSource> cameras = new ArrayList<>();
@@ -250,7 +249,7 @@ public final class Main {
     camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
     if (config.streamConfig != null) {
-      server.setConfigJson(gson.toJson(config.streamConfig));
+      camera.setConfigJson(gson.toJson(config.streamConfig));
     }
 
     return camera;
@@ -339,6 +338,8 @@ public final class Main {
         //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
         //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
         org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
+
+        org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       }
       numTargetsDetected = detections.length;
       returnedImg = mat;
@@ -350,6 +351,7 @@ public final class Main {
    * Main.
    */
   public static void main(String... args) {
+    tagDetector.addFamily("tag36h11");
     if (args.length > 0) {
       configFile = args[0];
     }
@@ -383,9 +385,11 @@ public final class Main {
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
+      CvSource goalDrawnVideo = CameraServer.putVideo("Goal Vision Stream", 640, 480);
+
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
-                server.putFrame(pipeline.returnedImg);
+                goalDrawnVideo.putFrame(pipeline.returnedImg);
         // do something with pipeline results
       });
       /* something like this for GRIP:
