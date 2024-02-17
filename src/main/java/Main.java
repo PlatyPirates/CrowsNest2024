@@ -327,7 +327,7 @@ public final class Main {
         MatOfPoint contour1 = new MatOfPoint(bottomLeft, bottomRight);
         MatOfPoint contour2 = new MatOfPoint(bottomRight, topRight);
         MatOfPoint contour3 = new MatOfPoint(topRight, topLeft);
-        MatOfPoint contour4 = new MatOfPoint(topRight, bottomRight);
+        MatOfPoint contour4 = new MatOfPoint(topLeft, bottomLeft);
 
         ArrayList<MatOfPoint> listOfContours = new ArrayList<MatOfPoint>();
         listOfContours.add(contour1);
@@ -335,8 +335,8 @@ public final class Main {
         listOfContours.add(contour3);
         listOfContours.add(contour4);
 
-        int borderWidth = 15; // border width in pixels
-        Scalar myBorderColor = new Scalar(255, 0, 0); // RGB values
+        int borderWidth = 3; // border width in pixels
+        Scalar myBorderColor = new Scalar(0, 0, 255); // RGB values
         //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
         //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
         org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
@@ -387,7 +387,7 @@ public final class Main {
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
-      CvSource goalDrawnVideo = CameraServer.putVideo("Goal Vision Stream", 640, 480);
+      CvSource goalDrawnVideo = CameraServer.putVideo("Goal Vision Stream (Buddy)", 1280, 720);
       IntegerTopic num = ntinst.getIntegerTopic("/datatable/num_targets_detected");
       final IntegerPublisher intPub = num.publish();
       intPub.setDefault(0);
