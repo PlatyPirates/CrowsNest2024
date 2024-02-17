@@ -21,6 +21,8 @@ import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSource;
+import edu.wpi.first.networktables.IntegerPublisher;
+import edu.wpi.first.networktables.IntegerTopic;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
@@ -304,7 +306,7 @@ public final class Main {
     public void process(Mat mat) {
       Mat grayscaleMat = new Mat();
       org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
-      AprilTagDetection detections[] = tagDetector.detect(mat);
+      AprilTagDetection detections[] = tagDetector.detect(grayscaleMat);
       for (int i=0; i<detections.length; i++) {
         AprilTagDetection detTag = detections[i]; // this detection
         /**
@@ -339,8 +341,8 @@ public final class Main {
         //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
         org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
 
-        org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       }
+      org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       numTargetsDetected = detections.length;
       returnedImg = mat;
 
@@ -386,10 +388,14 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       CvSource goalDrawnVideo = CameraServer.putVideo("Goal Vision Stream", 640, 480);
+      IntegerTopic num = ntinst.getIntegerTopic("/datatable/num_targets_detected");
+      final IntegerPublisher intPub = num.publish();
+      intPub.setDefault(0);
 
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
                 goalDrawnVideo.putFrame(pipeline.returnedImg);
+                intPub.set(pipeline.numTargetsDetected);
         // do something with pipeline results
       });
       /* something like this for GRIP:
