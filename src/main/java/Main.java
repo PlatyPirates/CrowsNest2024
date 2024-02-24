@@ -305,6 +305,8 @@ public final class Main {
     public int numTargetsDetected;
     public double centerOfAmpX;
     public double centerOfAmpY;
+    public int centerOfImageX;
+    public int centerOfImageY;
 
     @Override
     public void process(Mat mat) {
@@ -349,6 +351,8 @@ public final class Main {
           centerOfAmpX = detections[i].getCenterX();
           centerOfAmpY = detections[i].getCenterY();
         }
+        centerOfImageX = (mat.width())/2;
+        centerOfImageY = (mat.height())/2;
       }
       org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       numTargetsDetected = detections.length;
@@ -402,9 +406,15 @@ public final class Main {
       final DoublePublisher centerPubX = centerX.publish();
       DoubleTopic centerY = ntinst.getDoubleTopic("/datatable/center_of_amp_Y");
       final DoublePublisher centerPubY = centerY.publish();
+      IntegerTopic centerImageX = ntinst.getIntegerTopic("/datatable/center_of_image_X");
+      final IntegerPublisher imagePubX = centerImageX.publish();
+      IntegerTopic centerImageY = ntinst.getIntegerTopic("/datatable/center_of_image_Y");
+      final IntegerPublisher imagePubY = centerImageY.publish();
       intPub.setDefault(0);
       centerPubX.setDefault(-1);
       centerPubY.setDefault(-1);
+      imagePubX.setDefault(0);
+      imagePubY.setDefault(0);
 
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
