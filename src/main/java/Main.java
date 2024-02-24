@@ -313,6 +313,8 @@ public final class Main {
       Mat grayscaleMat = new Mat();
       org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
       AprilTagDetection detections[] = tagDetector.detect(grayscaleMat);
+      centerOfImageX = (mat.width())/2;
+      centerOfImageY = (mat.height())/2;
       for (int i=0; i<detections.length; i++) {
         AprilTagDetection detTag = detections[i]; // this detection
         /**
@@ -351,8 +353,6 @@ public final class Main {
           centerOfAmpX = detections[i].getCenterX();
           centerOfAmpY = detections[i].getCenterY();
         }
-        centerOfImageX = (mat.width())/2;
-        centerOfImageY = (mat.height())/2;
       }
       org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       numTargetsDetected = detections.length;
