@@ -23,6 +23,8 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
@@ -301,12 +303,18 @@ public final class Main {
   public static class MyPipeline implements VisionPipeline {
     public Mat returnedImg = new Mat();
     public int numTargetsDetected;
+    public double centerOfAmpX;
+    public double centerOfAmpY;
+    public int centerOfImageX;
+    public int centerOfImageY;
 
     @Override
     public void process(Mat mat) {
       Mat grayscaleMat = new Mat();
       org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
       AprilTagDetection detections[] = tagDetector.detect(grayscaleMat);
+      centerOfImageX = (mat.width())/2;
+      centerOfImageY = (mat.height())/2;
       for (int i=0; i<detections.length; i++) {
         AprilTagDetection detTag = detections[i]; // this detection
         /**
@@ -340,7 +348,11 @@ public final class Main {
         //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
         //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
         org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
-
+        int ID = detections[i].getId();
+        if(ID == 5 || ID == 6){
+          centerOfAmpX = detections[i].getCenterX();
+          centerOfAmpY = detections[i].getCenterY();
+        }
       }
       org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
       numTargetsDetected = detections.length;
@@ -390,12 +402,28 @@ public final class Main {
       CvSource goalDrawnVideo = CameraServer.putVideo("Goal Vision Stream (Buddy)", 1280, 720);
       IntegerTopic num = ntinst.getIntegerTopic("/datatable/num_targets_detected");
       final IntegerPublisher intPub = num.publish();
+      DoubleTopic centerX = ntinst.getDoubleTopic("/datatable/center_of_amp_X");
+      final DoublePublisher centerPubX = centerX.publish();
+      DoubleTopic centerY = ntinst.getDoubleTopic("/datatable/center_of_amp_Y");
+      final DoublePublisher centerPubY = centerY.publish();
+      IntegerTopic centerImageX = ntinst.getIntegerTopic("/datatable/center_of_image_X");
+      final IntegerPublisher imagePubX = centerImageX.publish();
+      IntegerTopic centerImageY = ntinst.getIntegerTopic("/datatable/center_of_image_Y");
+      final IntegerPublisher imagePubY = centerImageY.publish();
       intPub.setDefault(0);
+      centerPubX.setDefault(-1);
+      centerPubY.setDefault(-1);
+      imagePubX.setDefault(-1);
+      imagePubY.setDefault(-1);
 
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
                 goalDrawnVideo.putFrame(pipeline.returnedImg);
                 intPub.set(pipeline.numTargetsDetected);
+                centerPubX.set(pipeline.centerOfAmpX);
+                centerPubY.set(pipeline.centerOfAmpY);
+                imagePubX.set(pipeline.centerOfImageX);
+                imagePubY.set(pipeline.centerOfImageY);
         // do something with pipeline results
       });
       /* something like this for GRIP:
