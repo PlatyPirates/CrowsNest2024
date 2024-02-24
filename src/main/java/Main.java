@@ -413,8 +413,8 @@ public final class Main {
       intPub.setDefault(0);
       centerPubX.setDefault(-1);
       centerPubY.setDefault(-1);
-      imagePubX.setDefault(0);
-      imagePubY.setDefault(0);
+      imagePubX.setDefault(-1);
+      imagePubY.setDefault(-1);
 
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
@@ -422,6 +422,8 @@ public final class Main {
                 intPub.set(pipeline.numTargetsDetected);
                 centerPubX.set(pipeline.centerOfAmpX);
                 centerPubY.set(pipeline.centerOfAmpY);
+                imagePubX.set(pipeline.centerOfImageX);
+                imagePubY.set(pipeline.centerOfImageY);
         // do something with pipeline results
       });
       /* something like this for GRIP:
