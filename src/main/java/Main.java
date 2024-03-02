@@ -31,6 +31,7 @@ import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.apriltag.AprilTagDetection;
 import edu.wpi.first.apriltag.AprilTagDetector;
+import edu.wpi.first.wpilibj.RobotState;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -310,54 +311,55 @@ public final class Main {
 
     @Override
     public void process(Mat mat) {
-      Mat grayscaleMat = new Mat();
-      org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
-      AprilTagDetection detections[] = tagDetector.detect(grayscaleMat);
-      centerOfImageX = (mat.width())/2;
-      centerOfImageY = (mat.height())/2;
-      for (int i=0; i<detections.length; i++) {
-        AprilTagDetection detTag = detections[i]; // this detection
-        /**
-         * getCorners() gets the corners of the tag in image pixel coordinates. These
-         * always wrap counter-clockwise around the tag. The first set of corner
-         * coordinates are the coordinates for the bottom left corner.
-         */
-        
-        double [] myCorners = detTag.getCorners();
-        /*
-         * Turn the corners into an array of points so we can do something useful with them
-         */
-        Point bottomLeft = new Point(myCorners[0], myCorners[1]);
-        Point bottomRight = new Point(myCorners[2], myCorners[3]);
-        Point topRight = new Point(myCorners[4], myCorners[5]);
-        Point topLeft = new Point(myCorners[6], myCorners[7]);
+      if(RobotState.isAutonomous() && RobotState.isEnabled()) {
+        Mat grayscaleMat = new Mat();
+        org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
+        AprilTagDetection detections[] = tagDetector.detect(grayscaleMat);
+        centerOfImageX = (mat.width())/2;
+        centerOfImageY = (mat.height())/2;
+        for (int i=0; i<detections.length; i++) {
+          AprilTagDetection detTag = detections[i]; // this detection
+          /**
+           * getCorners() gets the corners of the tag in image pixel coordinates. These
+           * always wrap counter-clockwise around the tag. The first set of corner
+           * coordinates are the coordinates for the bottom left corner.
+           */
+          
+          double [] myCorners = detTag.getCorners();
+          /*
+          * Turn the corners into an array of points so we can do something useful with them
+          */
+          Point bottomLeft = new Point(myCorners[0], myCorners[1]);
+          Point bottomRight = new Point(myCorners[2], myCorners[3]);
+          Point topRight = new Point(myCorners[4], myCorners[5]);
+          Point topLeft = new Point(myCorners[6], myCorners[7]);
 
-        MatOfPoint contour1 = new MatOfPoint(bottomLeft, bottomRight);
-        MatOfPoint contour2 = new MatOfPoint(bottomRight, topRight);
-        MatOfPoint contour3 = new MatOfPoint(topRight, topLeft);
-        MatOfPoint contour4 = new MatOfPoint(topLeft, bottomLeft);
+          MatOfPoint contour1 = new MatOfPoint(bottomLeft, bottomRight);
+          MatOfPoint contour2 = new MatOfPoint(bottomRight, topRight);
+          MatOfPoint contour3 = new MatOfPoint(topRight, topLeft);
+          MatOfPoint contour4 = new MatOfPoint(topLeft, bottomLeft);
 
-        ArrayList<MatOfPoint> listOfContours = new ArrayList<MatOfPoint>();
-        listOfContours.add(contour1);
-        listOfContours.add(contour2);
-        listOfContours.add(contour3);
-        listOfContours.add(contour4);
+          ArrayList<MatOfPoint> listOfContours = new ArrayList<MatOfPoint>();
+          listOfContours.add(contour1);
+          listOfContours.add(contour2);
+          listOfContours.add(contour3);
+          listOfContours.add(contour4);
 
-        int borderWidth = 3; // border width in pixels
-        Scalar myBorderColor = new Scalar(0, 0, 255); // RGB values
-        //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
-        //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
-        org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
-        int ID = detections[i].getId();
-        if(ID == 5 || ID == 6){
-          centerOfAmpX = detections[i].getCenterX();
-          centerOfAmpY = detections[i].getCenterY();
+          int borderWidth = 3; // border width in pixels
+          Scalar myBorderColor = new Scalar(0, 0, 255); // RGB values
+          //Mat myBorder = new Mat(mat.rows() + border*2, mat.cols() + border*2, mat.depth(), myBorderColor);
+          //copyMakeBorder(mat, myBorder, border, border, border, border, BORDER_REPLICATE);
+          org.opencv.imgproc.Imgproc.drawContours(mat, listOfContours, -1, myBorderColor, borderWidth);
+          int ID = detections[i].getId();
+          if(ID == 5 || ID == 6){
+            centerOfAmpX = detections[i].getCenterX();
+            centerOfAmpY = detections[i].getCenterY();
+          }
         }
+        org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
+        numTargetsDetected = detections.length;
       }
-      org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
-      numTargetsDetected = detections.length;
       returnedImg = mat;
-
     }
   }
 
