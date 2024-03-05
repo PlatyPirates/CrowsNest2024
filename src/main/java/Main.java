@@ -23,6 +23,8 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.IntegerTopic;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.BooleanTopic;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTableEvent;
@@ -311,6 +313,7 @@ public final class Main {
 
     @Override
     public void process(Mat mat) {
+      System.out.println("1 / Autonomous: " + RobotState.isAutonomous() + "; " + "Enabled: " +RobotState.isEnabled());
       if(RobotState.isAutonomous() && RobotState.isEnabled()) {
         Mat grayscaleMat = new Mat();
         org.opencv.imgproc.Imgproc.cvtColor(mat, grayscaleMat, org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY);
@@ -359,6 +362,7 @@ public final class Main {
         org.opencv.imgproc.Imgproc.circle(mat, new Point(5,5), 4, new Scalar(0, 255, 0));
         numTargetsDetected = detections.length;
       }
+      System.out.println("2 / Autonomous: " + RobotState.isAutonomous() + "; " + "Enabled: " +RobotState.isEnabled());
       returnedImg = mat;
     }
   }
@@ -367,6 +371,7 @@ public final class Main {
    * Main.
    */
   public static void main(String... args) {
+    System.out.println("hello");
     tagDetector.addFamily("tag36h11");
     if (args.length > 0) {
       configFile = args[0];
@@ -412,6 +417,8 @@ public final class Main {
       final IntegerPublisher imagePubX = centerImageX.publish();
       IntegerTopic centerImageY = ntinst.getIntegerTopic("/datatable/center_of_image_Y");
       final IntegerPublisher imagePubY = centerImageY.publish();
+
+
       intPub.setDefault(0);
       centerPubX.setDefault(-1);
       centerPubY.setDefault(-1);
