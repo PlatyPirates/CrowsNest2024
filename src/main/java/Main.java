@@ -308,6 +308,9 @@ public final class Main {
     public int centerOfImageX;
     public int centerOfImageY;
 
+    public Point topLeft, topRight, bottomLeft, bottomRight;
+
+
     @Override
     public void process(Mat mat) {
       Mat grayscaleMat = new Mat();
@@ -327,10 +330,10 @@ public final class Main {
         /*
          * Turn the corners into an array of points so we can do something useful with them
          */
-        Point bottomLeft = new Point(myCorners[0], myCorners[1]);
-        Point bottomRight = new Point(myCorners[2], myCorners[3]);
-        Point topRight = new Point(myCorners[4], myCorners[5]);
-        Point topLeft = new Point(myCorners[6], myCorners[7]);
+        bottomLeft = new Point(myCorners[0], myCorners[1]);
+        bottomRight = new Point(myCorners[2], myCorners[3]);
+        topRight = new Point(myCorners[4], myCorners[5]);
+        topLeft = new Point(myCorners[6], myCorners[7]);
 
         MatOfPoint contour1 = new MatOfPoint(bottomLeft, bottomRight);
         MatOfPoint contour2 = new MatOfPoint(bottomRight, topRight);
@@ -410,11 +413,14 @@ public final class Main {
       final IntegerPublisher imagePubX = centerImageX.publish();
       IntegerTopic centerImageY = ntinst.getIntegerTopic("/datatable/center_of_image_Y");
       final IntegerPublisher imagePubY = centerImageY.publish();
+      IntegerTopic distFactor = ntinst.getIntegerTopic("/datatable/distance_factor");
+      final IntegerPublisher distanceFactor = distFactor.publish();
       intPub.setDefault(0);
       centerPubX.setDefault(-1);
       centerPubY.setDefault(-1);
       imagePubX.setDefault(-1);
       imagePubY.setDefault(-1);
+      distanceFactor.setDefault(0);
 
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new MyPipeline(), pipeline -> {
@@ -424,6 +430,7 @@ public final class Main {
                 centerPubY.set(pipeline.centerOfAmpY);
                 imagePubX.set(pipeline.centerOfImageX);
                 imagePubY.set(pipeline.centerOfImageY);
+                distanceFactor.set((int)(pipeline.bottomRight.x-pipeline.bottomLeft.x));
         // do something with pipeline results
       });
       /* something like this for GRIP:
